@@ -1,0 +1,92 @@
+apply plugin: 'kotlin'
+apply plugin: 'spring-boot'
+
+buildscript {
+    ext {
+        springBootVersion = '1.5.3.RELEASE'
+        kotlin_version = '1.1.3-2'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+group 'com.dounine'
+version '1.0'
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes(
+                'Implementation-Title': 'Gradle',
+                'Implementation-Version': version,
+                'Created-By': 'lake',
+                'Main-Class': 'com.dounine.qssc.Application',
+                'Class-Path': new File('./build/tmp/jars').list().collect { "lib/${it}" }.join(' ')
+        )
+    }
+    into('lib') {
+        from configurations.runtime
+    }
+}
+task copyJars(type: Copy) {
+    from configurations.runtime
+    into new File('build/libs/lib') // 目标位置
+}
+compileJava.dependsOn copyJars
+
+def env = hasProperty("pro") ? "pro" : (hasProperty("dev") ? "dev" : null)
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources", "src/main/profile/$env"]
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-netflix:1.3.1.RELEASE'
+        mavenBom 'org.springframework.cloud:spring-cloud-config:1.3.1.RELEASE'
+    }
+}
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
+    compile 'org.springframework.cloud:spring-cloud-starter-eureka'
+    compile 'org.springframework.cloud:spring-cloud-starter-config'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
+    compile group: 'com.alibaba', name: 'fastjson', version: "1.2.31"
+    compile group: 'com.google.guava', name: 'guava', version: "21.0"
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+    compile group: 'com.fasterxml.jackson.jaxrs', name:'jackson-jaxrs-xml-provider',version:'2.5.0'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.3.RELEASE'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
