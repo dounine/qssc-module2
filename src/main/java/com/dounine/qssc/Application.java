@@ -4,8 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
@@ -17,13 +19,12 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.dounine.qssc"})
 @EnableAutoConfiguration(exclude = {ValidationAutoConfiguration.class})
-//@EnableDiscoveryClient
-@EnableEurekaClient
+@EnableDiscoveryClient
+@EnableFeignClients
 public class Application {
 
-    @Primary
-    @LoadBalanced
     @Bean
+    @LoadBalanced
     public RestTemplate getRest(){
         return new RestTemplate();
     }
